@@ -1,0 +1,10 @@
+# Visual Studio Cache and settings
+.vs/
+*.user
+
+# Build outputs
+bin/
+obj/
+
+# Environment specific configuration
+appsettings.Development.json
