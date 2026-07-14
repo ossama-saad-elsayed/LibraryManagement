@@ -26,5 +26,11 @@ namespace LibraryManagement.Services
             return  AllAuthors ;
         }
 
+        //public async Task<AuthorDto> GetAuthor(string Name)
+        //{
+            
+            
+        //}
+
     }
 }

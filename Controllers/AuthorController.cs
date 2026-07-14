@@ -11,7 +11,6 @@ namespace LibraryManagement.Controllers
     [ApiController]
     public class AuthorController : ControllerBase
     {
-        readonly  AuthorService authorService;
         private readonly IAuthorService _authorService;
 
 
