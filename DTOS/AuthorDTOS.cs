@@ -8,7 +8,6 @@ namespace LibraryManagement.DTOS
         public string Name { get; set; } = null!;
         public string? Biography { get; set; }
 
-        public List<BookDto> ? AuthorBooks { get; set; }
     }
 
     public class CreateAuthorDto

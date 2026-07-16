@@ -28,9 +28,9 @@ namespace LibraryManagement.Services
                 AuthorId = b.AuthorId,
                 CategoryId = b.CategoryId,
                 PublisherId = b.PublisherId,
-                AuthorName = "O",
-                CategoryName = "O",
-                PublisherName = "O"
+                AuthorName = b.Author.Name,
+                CategoryName = b.Category.Name,
+                PublisherName = b.Publisher.Name,
             }
             ).ToListAsync();
 
@@ -39,13 +39,19 @@ namespace LibraryManagement.Services
 
         public async Task<BookDto?> GetBookbyId(int Id)
         {
-            var book = await _dbContext.Books.FindAsync(Id);
+            var book = await _dbContext.Books
+        .AsNoTracking()
+        .Include(b => b.Author)
+        .Include(b => b.Category)
+        .Include(b => b.Publisher)
+        .FirstOrDefaultAsync(b => b.Id == Id);
+
             if (book == null)
             {
                 return null;
             }
 
-            BookDto bookDto = new BookDto
+            return new BookDto
             {
                 Id = book.Id,
                 Title = book.Title,
@@ -56,18 +62,20 @@ namespace LibraryManagement.Services
                 AuthorId = book.AuthorId,
                 CategoryId = book.CategoryId,
                 PublisherId = book.PublisherId,
-                AuthorName = "O",
-                CategoryName = "O",
-                PublisherName = "O"
+                AuthorName = book.Author.Name,      
+                CategoryName = book.Category.Name,  
+                PublisherName = book.Publisher.Name 
             };
-
-
-            return bookDto;
         }
 
         public async Task<BookDto?> GetBookbyTitle(string Title)
         {
-            var book = await _dbContext.Books.AsNoTracking().FirstOrDefaultAsync(b => b.Title == Title);
+            var book = await _dbContext.Books
+        .AsNoTracking()
+        .Include(b => b.Author)
+        .Include(b => b.Category)
+        .Include(b => b.Publisher)
+        .FirstOrDefaultAsync(b => b.Title == Title);
             if (book == null)
             {
                 return null;
@@ -84,15 +92,60 @@ namespace LibraryManagement.Services
                 AuthorId = book.AuthorId,
                 CategoryId = book.CategoryId,
                 PublisherId = book.PublisherId,
-                AuthorName = "O",
-                CategoryName = "O",
-                PublisherName = "O"
+                AuthorName = book.Author.Name,
+                CategoryName = book.Category.Name,
+                PublisherName = book.Publisher.Name
             };
 
 
             return bookDto;
         }
 
+        public async Task<List<BookDto>> GetBooksByCategoryName(string categoryName)
+        {
+            return await _dbContext.Books
+                .AsNoTracking()
+                .Where(b => b.Category.Name.Contains(categoryName)) 
+                .Select(b => new BookDto
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    ISBN = b.Isbn,
+                    PublicationYear = b.PublicationYear ?? 0,
+                    CopiesOwned = b.CopiesOwned,
+                    AvailableCopies = b.AvailableCopies,
+                    AuthorId = b.AuthorId,
+                    CategoryId = b.CategoryId,
+                    PublisherId = b.PublisherId,
+                    AuthorName = b.Author.Name,
+                    CategoryName = b.Category.Name,
+                    PublisherName = b.Publisher.Name
+                })
+                .ToListAsync();
+        }
+
+        public async Task<List<BookDto>> GetBooksByAuthorName(string authorName)
+        {
+            return await _dbContext.Books
+                .AsNoTracking()
+                .Where(b => b.Author.Name.Contains(authorName))
+                .Select(b => new BookDto
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    ISBN = b.Isbn,
+                    PublicationYear = b.PublicationYear ?? 0,
+                    CopiesOwned = b.CopiesOwned,
+                    AvailableCopies = b.AvailableCopies,
+                    AuthorId = b.AuthorId,
+                    CategoryId = b.CategoryId,
+                    PublisherId = b.PublisherId,
+                    AuthorName = b.Author.Name,
+                    CategoryName = b.Category.Name,
+                    PublisherName = b.Publisher.Name
+                })
+                .ToListAsync();
+        }
         public async Task<int> AddBook(CreateBookDto NewBook)
         {
             var book = new Book
@@ -108,7 +161,7 @@ namespace LibraryManagement.Services
 
             await _dbContext.AddAsync(book);
 
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
 
             return book.Id;
         }
@@ -136,6 +189,93 @@ namespace LibraryManagement.Services
             return true;
         }
 
+        public async Task<int> AddBookByNames(CreateBookByNamesDto dto)
+        {
+            var author = await _dbContext.Authors.FirstOrDefaultAsync(a => a.Name == dto.AuthorName);
+            if (author == null)
+            {
+                author = new Author { Name = dto.AuthorName };
+                await _dbContext.Authors.AddAsync(author);
+            }
+
+            var category = await _dbContext.Categories.FirstOrDefaultAsync(c => c.Name == dto.CategoryName);
+            if (category == null)
+            {
+                category = new Category { Name = dto.CategoryName };
+                await _dbContext.Categories.AddAsync(category);
+            }
+
+            var publisher = await _dbContext.Publishers.FirstOrDefaultAsync(p => p.Name == dto.PublisherName);
+            if (publisher == null)
+            {
+                publisher = new Publisher { Name = dto.PublisherName };
+                await _dbContext.Publishers.AddAsync(publisher);
+            }
+
+           
+            var book = new Book
+            {
+                Isbn = dto.ISBN,
+                Title = dto.Title,
+                PublicationYear = dto.PublicationYear,
+                CopiesOwned = dto.CopiesOwned,
+                Author = author,
+                Category = category,
+                Publisher = publisher
+            };
+
+            await _dbContext.Books.AddAsync(book);
+            await _dbContext.SaveChangesAsync(); 
+
+            return book.Id;
+        }
+
+        public async Task<bool> UpdateBookByNames(UpdateBookByNamesDto dto)
+        {
+            // 1. نجيب الكتاب الحقيقي أولاً
+            var book = await _dbContext.Books.FindAsync(dto.Id);
+            if (book == null)
+            {
+                return false;
+            }
+
+            // 2. تشيك أو إنشاء الـ Author الجديد
+            var author = await _dbContext.Authors.FirstOrDefaultAsync(a => a.Name == dto.AuthorName);
+            if (author == null)
+            {
+                author = new Author { Name = dto.AuthorName };
+                await _dbContext.Authors.AddAsync(author);
+            }
+
+            // 3. تشيك أو إنشاء الـ Category الجديد
+            var category = await _dbContext.Categories.FirstOrDefaultAsync(c => c.Name == dto.CategoryName);
+            if (category == null)
+            {
+                category = new Category { Name = dto.CategoryName };
+                await _dbContext.Categories.AddAsync(category);
+            }
+
+            // 4. تشيك أو إنشاء الـ Publisher الجديد
+            var publisher = await _dbContext.Publishers.FirstOrDefaultAsync(p => p.Name == dto.PublisherName);
+            if (publisher == null)
+            {
+                publisher = new Publisher { Name = dto.PublisherName };
+                await _dbContext.Publishers.AddAsync(publisher);
+            }
+
+            // 5. تعديل بيانات الكتاب وربطه بالقيم الجديدة
+            book.Isbn = dto.ISBN;
+            book.Title = dto.Title;
+            book.PublicationYear = dto.PublicationYear;
+            book.CopiesOwned = dto.CopiesOwned;
+            book.Author = author;
+            book.Category = category;
+            book.Publisher = publisher;
+
+            await _dbContext.SaveChangesAsync();
+            return true;
+        }
+
         public async Task<bool> DeleteBook(int id)
         {
             var book = await _dbContext.Books.FindAsync(id);
@@ -146,7 +286,7 @@ namespace LibraryManagement.Services
             }
 
             _dbContext.Remove(book);
-
+          await   _dbContext.SaveChangesAsync();
             return true;
         }
 

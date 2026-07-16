@@ -22,6 +22,7 @@ namespace LibraryManagement
             builder.Services.AddSwaggerGen();
             builder.Services.AddScoped<IAuthorService, AuthorService>();
             builder.Services.AddScoped<IBookService,BookService>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

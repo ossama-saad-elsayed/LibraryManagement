@@ -10,6 +10,10 @@ namespace LibraryManagement.Services.interfaces
           Task<int> AddBook(CreateBookDto NewBook);
           Task<bool> UpdateBook(BookDto UpdateBook);
           Task<bool> DeleteBook(int id);
+        Task<List<BookDto>> GetBooksByCategoryName(string categoryName);
+        Task<List<BookDto>> GetBooksByAuthorName(string authorName);
+        Task<int> AddBookByNames(CreateBookByNamesDto dto);
+        Task<bool> UpdateBookByNames(UpdateBookByNamesDto dto);
 
     }
 }
