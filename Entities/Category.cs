@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace LibraryManagement.Models;
+namespace LibraryManagement.Entities;
 
-public partial class Publisher
+public partial class Category
 {
     public int Id { get; set; }
 
     public string Name { get; set; } = null!;
 
-    public string? Address { get; set; }
-
-    public string? ContactNumber { get; set; }
+    public string? Description { get; set; }
 
     public virtual ICollection<Book> Books { get; set; } = new List<Book>();
 }

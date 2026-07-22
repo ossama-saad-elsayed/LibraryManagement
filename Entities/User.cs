@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace LibraryManagement.Models;
+namespace LibraryManagement.Entities;
 
 public partial class User
 {
@@ -16,8 +16,4 @@ public partial class User
     public string Role { get; set; } = null!;
 
     public DateTime CreatedAt { get; set; }
-
-    public virtual ICollection<BookReservation> BookReservations { get; set; } = new List<BookReservation>();
-
-    public virtual ICollection<BorrowRecord> BorrowRecords { get; set; } = new List<BorrowRecord>();
 }

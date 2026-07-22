@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace LibraryManagement.Models;
+namespace LibraryManagement.Entities;
 
 public partial class Book
 {
@@ -24,8 +24,6 @@ public partial class Book
     public int PublisherId { get; set; }
 
     public virtual Author Author { get; set; } = null!;
-
-    public virtual ICollection<BookReservation> BookReservations { get; set; } = new List<BookReservation>();
 
     public virtual ICollection<BorrowRecord> BorrowRecords { get; set; } = new List<BorrowRecord>();
 

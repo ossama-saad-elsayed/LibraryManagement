@@ -1,5 +1,5 @@
 ﻿using LibraryManagement.DTOS;
-using LibraryManagement.Models;
+using LibraryManagement.Entities;
 using LibraryManagement.Services.interfaces;
 using Microsoft.EntityFrameworkCore;
 

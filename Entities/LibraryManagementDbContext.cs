@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-namespace LibraryManagement.Models;
+namespace LibraryManagement.Entities;
 
 public partial class LibraryManagementDbContext : DbContext
 {
@@ -19,20 +19,20 @@ public partial class LibraryManagementDbContext : DbContext
 
     public virtual DbSet<Book> Books { get; set; }
 
-    public virtual DbSet<BookReservation> BookReservations { get; set; }
-
     public virtual DbSet<BorrowRecord> BorrowRecords { get; set; }
 
     public virtual DbSet<Category> Categories { get; set; }
 
     public virtual DbSet<Fine> Fines { get; set; }
 
+    public virtual DbSet<Member> Members { get; set; }
+
     public virtual DbSet<Publisher> Publishers { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
     //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    //    => optionsBuilder.UseSqlServer();
+    //    => optionsBuilder.UseSqlServer("Server=localhost\\SQLEXPRESS;Database=LibraryManagementDB;Trusted_Connection=True;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -78,34 +78,6 @@ public partial class LibraryManagementDbContext : DbContext
                 .HasConstraintName("FK_BOOKS_PUBLISHERS");
         });
 
-        modelBuilder.Entity<BookReservation>(entity =>
-        {
-            entity.ToTable("BOOK_RESERVATIONS");
-
-            entity.HasIndex(e => e.BookId, "IX_BOOK_RESERVATIONS_BookId");
-
-            entity.HasIndex(e => e.Status, "IX_BOOK_RESERVATIONS_Status");
-
-            entity.HasIndex(e => e.UserId, "IX_BOOK_RESERVATIONS_UserId");
-
-            entity.Property(e => e.ReservationDate)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime");
-            entity.Property(e => e.Status)
-                .HasMaxLength(20)
-                .HasDefaultValue("Pending");
-
-            entity.HasOne(d => d.Book).WithMany(p => p.BookReservations)
-                .HasForeignKey(d => d.BookId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_BOOK_RESERVATIONS_BOOKS");
-
-            entity.HasOne(d => d.User).WithMany(p => p.BookReservations)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_BOOK_RESERVATIONS_USERS");
-        });
-
         modelBuilder.Entity<BorrowRecord>(entity =>
         {
             entity.ToTable("BORROW_RECORDS");
@@ -113,8 +85,6 @@ public partial class LibraryManagementDbContext : DbContext
             entity.HasIndex(e => e.BookId, "IX_BORROW_RECORDS_BookId");
 
             entity.HasIndex(e => e.Status, "IX_BORROW_RECORDS_Status");
-
-            entity.HasIndex(e => e.UserId, "IX_BORROW_RECORDS_UserId");
 
             entity.Property(e => e.BorrowDate)
                 .HasDefaultValueSql("(getdate())")
@@ -130,10 +100,10 @@ public partial class LibraryManagementDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_BORROW_RECORDS_BOOKS");
 
-            entity.HasOne(d => d.User).WithMany(p => p.BorrowRecords)
-                .HasForeignKey(d => d.UserId)
+            entity.HasOne(d => d.Member).WithMany(p => p.BorrowRecords)
+                .HasForeignKey(d => d.MemberId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_BORROW_RECORDS_USERS");
+                .HasConstraintName("FK_BORROW_RECORDS_MEMBERS");
         });
 
         modelBuilder.Entity<Category>(entity =>
@@ -158,6 +128,20 @@ public partial class LibraryManagementDbContext : DbContext
                 .HasForeignKey(d => d.BorrowRecordId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_FINES_BORROW_RECORDS");
+        });
+
+        modelBuilder.Entity<Member>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__MEMBERS__3214EC07BDD5B666");
+
+            entity.ToTable("MEMBERS");
+
+            entity.Property(e => e.Address).HasMaxLength(300);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getutcdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.FullName).HasMaxLength(200);
+            entity.Property(e => e.PhoneNumber).HasMaxLength(20);
         });
 
         modelBuilder.Entity<Publisher>(entity =>

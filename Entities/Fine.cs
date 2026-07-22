@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace LibraryManagement.Models;
+namespace LibraryManagement.Entities;
 
 public partial class Fine
 {
