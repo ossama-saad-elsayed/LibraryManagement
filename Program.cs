@@ -24,6 +24,7 @@ namespace LibraryManagement
             builder.Services.AddScoped<IAuthorService, AuthorService>();
             builder.Services.AddScoped<IBookService,BookService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -39,7 +40,9 @@ namespace LibraryManagement
 
 
             app.MapControllers();
-
+            Console.WriteLine("========================================");
+            Console.WriteLine("REAL HASH: " + BCrypt.Net.BCrypt.HashPassword("password1"));
+            Console.WriteLine("========================================");
             app.Run();
         }
     }
