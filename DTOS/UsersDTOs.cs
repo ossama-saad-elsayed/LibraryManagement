@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace LibraryManagement.DTOS
 {
@@ -30,5 +30,19 @@ namespace LibraryManagement.DTOS
             [Required(ErrorMessage = "Role is required.")]
             public string Role { get; set; } = "Employee";
         }
+    }
+
+    public class UpdateUserDto
+    {
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "Name must be between 2 and 100 characters.")]
+        public string? Name { get; set; }
+
+        [EmailAddress(ErrorMessage = "Invalid email address format.")]
+        public string? Email { get; set; }
+
+        [MinLength(6, ErrorMessage = "Password must be at least 6 characters long.")]
+        public string? Password { get; set; }
+
+        public string? Role { get; set; }
     }
 }
