@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace LibraryManagement.DTOS
 {
@@ -6,12 +6,12 @@ namespace LibraryManagement.DTOS
     {
         public int Id { get; set; }
         public int BorrowRecordId { get; set; }
+        public int MemberId { get; set; }
+        public string MemberFullName { get; set; } = null!;
+        public string BookTitle { get; set; } = null!;
         public decimal Amount { get; set; }
         public bool IsPaid { get; set; }
-        public DateTime? PaidDate { get; set; } // Nullable until paid
-
-        public string UserName { get; set; } = null!;
-        public string BookTitle { get; set; } = null!;
+        public DateTime? PaidDate { get; set; }
     }
 
     public class CreateFineDto

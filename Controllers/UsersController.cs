@@ -1,10 +1,12 @@
 using LibraryManagement.DTOS;
 using LibraryManagement.Services.interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static LibraryManagement.DTOS.CreateUserDto;
 
 namespace LibraryManagement.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase

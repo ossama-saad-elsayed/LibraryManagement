@@ -72,6 +72,8 @@ namespace LibraryManagement
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IPublisherService, PublisherService>();
             builder.Services.AddScoped<IMemberService, MemberService>();
+            builder.Services.AddScoped<IBorrowRecordService, BorrowRecordService>();
+            builder.Services.AddScoped<IFineService, FineService>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

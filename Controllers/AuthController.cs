@@ -1,6 +1,7 @@
-﻿using LibraryManagement.DTOS;
+using LibraryManagement.DTOS;
 using LibraryManagement.Services;
 using LibraryManagement.Services.interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
@@ -21,6 +22,7 @@ namespace LibraryManagement.Controllers
             _authService = authService;
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDTO request)
             {

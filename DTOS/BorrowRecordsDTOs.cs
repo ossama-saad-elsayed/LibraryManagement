@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace LibraryManagement.DTOS
 {
@@ -6,14 +6,14 @@ namespace LibraryManagement.DTOS
     {
         public int Id { get; set; }
         public int BookId { get; set; }
-        public int UserId { get; set; }
+        public int MemberId { get; set; }
         public DateTime BorrowDate { get; set; }
         public DateTime DueDate { get; set; }
         public DateTime? ReturnDate { get; set; } 
         public string Status { get; set; } = null!;
 
         public string BookTitle { get; set; } = null!;
-        public string UserName { get; set; } = null!;
+        public string MemberFullName { get; set; } = null!;
     }
 
     public class CreateBorrowRecordDto
@@ -21,8 +21,8 @@ namespace LibraryManagement.DTOS
         [Required(ErrorMessage = "BookId is required.")]
         public int BookId { get; set; }
 
-        [Required(ErrorMessage = "UserId is required.")]
-        public int UserId { get; set; }
+        [Required(ErrorMessage = "MemberId is required.")]
+        public int MemberId { get; set; }
 
         [Required(ErrorMessage = "Borrow date is required.")]
         public DateTime BorrowDate { get; set; } = DateTime.UtcNow;
