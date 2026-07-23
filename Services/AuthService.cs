@@ -1,4 +1,4 @@
-﻿using LibraryManagement.DTOS;
+using LibraryManagement.DTOS;
 using LibraryManagement.Entities;
 using LibraryManagement.Services.interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -30,7 +30,7 @@ namespace LibraryManagement.Services
             if (user == null)
                 return null;
            
-            bool isValidPassword = BCrypt.Net.BCrypt.Verify(request.hashPassord , user.PasswordHash);
+            bool isValidPassword = BCrypt.Net.BCrypt.Verify(request.Password , user.PasswordHash);
             if (!isValidPassword)
                 return null; 
 
