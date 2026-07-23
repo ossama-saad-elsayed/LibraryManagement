@@ -70,6 +70,8 @@ namespace LibraryManagement
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IPublisherService, PublisherService>();
+            builder.Services.AddScoped<IMemberService, MemberService>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
