@@ -23,7 +23,8 @@ namespace LibraryManagement.Services
                 .Select(c => new CategoryDto
                 {
                     Id = c.Id,
-                    Name = c.Name
+                    Name = c.Name,
+                    Description = c.Description
                 })
                 .ToListAsync();
 
@@ -43,7 +44,8 @@ namespace LibraryManagement.Services
             return new CategoryDto
             {
                 Id = category.Id,
-                Name = category.Name
+                Name = category.Name,
+                Description = category.Description
             };
         }
 
@@ -62,7 +64,8 @@ namespace LibraryManagement.Services
             return new CategoryDto
             {
                 Id = category.Id,
-                Name = category.Name
+                Name = category.Name,
+                Description = category.Description
             };
         }
 
@@ -92,6 +95,7 @@ namespace LibraryManagement.Services
             }
 
             category.Name = updateCategory.Name;
+            category.Description = updateCategory.Description;
 
             await _dbContext.SaveChangesAsync();
 

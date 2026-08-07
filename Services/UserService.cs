@@ -2,7 +2,6 @@ using LibraryManagement.DTOS;
 using LibraryManagement.Entities;
 using LibraryManagement.Services.interfaces;
 using Microsoft.EntityFrameworkCore;
-using static LibraryManagement.DTOS.CreateUserDto;
 
 namespace LibraryManagement.Services
 {
@@ -17,20 +16,38 @@ namespace LibraryManagement.Services
 
         public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
         {
-            var users = await _context.Users.ToListAsync();
-            return users.Select(u => new UserDto
-            {
-                Id = u.Id,
-                Name = u.Name,
-                Email = u.Email,
-                Role = u.Role,
-                CreatedAt = u.CreatedAt
-            });
+            var users = await _context.Users
+                .Select(u => new UserDto
+                {
+                    Id = u.Id,
+                    Name = u.Name,
+                    Email = u.Email,
+                    Role = u.Role,
+                    CreatedAt = u.CreatedAt
+                })
+                .ToListAsync();
+
+            return users;
         }
 
         public async Task<UserDto?> GetUserByIdAsync(int id)
         {
             var user = await _context.Users.FindAsync(id);
+            if (user == null) return null;
+
+            return new UserDto
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                Role = user.Role,
+                CreatedAt = user.CreatedAt
+            };
+        }
+
+        public async Task<UserDto?> GetUserByEmailAsync(string email)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (user == null) return null;
 
             return new UserDto

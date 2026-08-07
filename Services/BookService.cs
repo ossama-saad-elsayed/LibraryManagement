@@ -154,6 +154,7 @@ namespace LibraryManagement.Services
                 Title = NewBook.Title,
                 PublicationYear = NewBook.PublicationYear,
                 CopiesOwned = NewBook.CopiesOwned,
+                AvailableCopies = NewBook.CopiesOwned,
                 AuthorId = NewBook.AuthorId,
                 CategoryId = NewBook.CategoryId,
                 PublisherId = NewBook.PublisherId,
@@ -179,6 +180,7 @@ namespace LibraryManagement.Services
             book.Title = UpdateBook.Title;
             book.PublicationYear = UpdateBook.PublicationYear;
             book.CopiesOwned = UpdateBook.CopiesOwned;
+            book.AvailableCopies = UpdateBook.AvailableCopies;
             book.AuthorId = UpdateBook.AuthorId;
             book.CategoryId = UpdateBook.CategoryId;
             book.PublisherId = UpdateBook.PublisherId;

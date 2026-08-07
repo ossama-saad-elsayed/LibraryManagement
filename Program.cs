@@ -15,6 +15,15 @@ namespace LibraryManagement
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAllOrigins", policy =>
+                {
+                    policy.AllowAnyOrigin()   
+                          .AllowAnyMethod()   
+                          .AllowAnyHeader();  
+                });
+            });
 
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -61,7 +70,7 @@ namespace LibraryManagement
                         ValidateIssuerSigningKey = true,
                         ValidIssuer = builder.Configuration["Jwt:Issuer"],
                         ValidAudience = builder.Configuration["Jwt:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "THIS_IS_A_VERY_SECRET_KEY_123456"))
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key is not configured.")))
                     };
                 });
 
@@ -83,16 +92,18 @@ namespace LibraryManagement
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
+            if (!app.Environment.IsProduction())
+            {
+                app.UseHttpsRedirection();
+            }
 
+            app.UseRouting();
+            app.UseCors("AllowAllOrigins");
             app.UseAuthentication();
             app.UseAuthorization();
 
 
             app.MapControllers();
-            Console.WriteLine("========================================");
-            Console.WriteLine("REAL HASH: " + BCrypt.Net.BCrypt.HashPassword("password1"));
-            Console.WriteLine("========================================");
             app.Run();
         }
     }

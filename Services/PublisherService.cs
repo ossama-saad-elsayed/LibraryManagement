@@ -16,14 +16,17 @@ namespace LibraryManagement.Services
 
         public async Task<IEnumerable<PublisherDto>> GetAllPublishersAsync()
         {
-            var publishers = await _context.Publishers.ToListAsync();
-            return publishers.Select(p => new PublisherDto
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Address = p.Address,
-                ContactNumber = p.ContactNumber
-            });
+            var publishers = await _context.Publishers
+                .Select(p => new PublisherDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Address = p.Address,
+                    ContactNumber = p.ContactNumber
+                })
+                .ToListAsync();
+
+            return publishers;
         }
 
         public async Task<PublisherDto?> GetPublisherByIdAsync(int id)

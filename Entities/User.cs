@@ -16,4 +16,6 @@ public partial class User
     public string Role { get; set; } = null!;
 
     public DateTime CreatedAt { get; set; }
+
+    public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 }

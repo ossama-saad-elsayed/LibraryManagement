@@ -31,7 +31,7 @@ namespace LibraryManagement.DTOS
         public string ISBN { get; set; } = null!;
 
         [Required(ErrorMessage = "Publication year is required.")]
-        [Range(1000, 2026, ErrorMessage = "Please enter a valid publication year.")]
+        [Range(1000, 2100, ErrorMessage = "Please enter a valid publication year.")]
         public int PublicationYear { get; set; }
 
         [Required(ErrorMessage = "Copies owned count is required.")]
@@ -59,7 +59,7 @@ namespace LibraryManagement.DTOS
         public string Title { get; set; } = null!;
 
         [Required(ErrorMessage = "Publication year is required.")]
-        [Range(1000, 2026, ErrorMessage = "Publication year must be a valid year between 1000 and 2026.")]
+        [Range(1000, 2100, ErrorMessage = "Publication year must be a valid year between 1000 and 2100.")]
         public int PublicationYear { get; set; }
 
         [Required(ErrorMessage = "Copies owned is required.")]

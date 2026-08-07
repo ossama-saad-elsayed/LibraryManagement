@@ -59,7 +59,7 @@ namespace LibraryManagement.Controllers
         }
 
         // 4. POST: api/category 
-        [HttpPost("Add Category")]
+        [HttpPost("AddCategory")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> AddCategory([FromBody] CreateCategoryDto createCategoryDto)
@@ -75,7 +75,7 @@ namespace LibraryManagement.Controllers
         }
 
         // 5. PUT: api/category 
-        [HttpPut("UpateCategory")]
+        [HttpPut("UpdateCategory")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

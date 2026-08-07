@@ -2,11 +2,10 @@ using LibraryManagement.DTOS;
 using LibraryManagement.Services.interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using static LibraryManagement.DTOS.CreateUserDto;
 
 namespace LibraryManagement.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
@@ -17,7 +16,7 @@ namespace LibraryManagement.Controllers
         {
             _userService = userService;
         }
-
+       
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers()
         {
@@ -42,6 +41,12 @@ namespace LibraryManagement.Controllers
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+
+            var existingUser = await _userService.GetUserByEmailAsync(request.Email);
+            if (existingUser != null)
+            {
+                return Conflict(new { message = $"A user with email '{request.Email}' already exists." });
             }
 
             var createdUser = await _userService.CreateUserAsync(request);

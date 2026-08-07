@@ -31,6 +31,8 @@ public partial class LibraryManagementDbContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
+    public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
+
     //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     //    => optionsBuilder.UseSqlServer("Server=localhost\\SQLEXPRESS;Database=LibraryManagementDB;Trusted_Connection=True;TrustServerCertificate=True;");
 
@@ -168,6 +170,29 @@ public partial class LibraryManagementDbContext : DbContext
             entity.Property(e => e.Role)
                 .HasMaxLength(20)
                 .HasDefaultValue("Member");
+        });
+
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.ToTable("REFRESH_TOKENS");
+
+            entity.HasIndex(e => e.TokenHash, "IX_REFRESH_TOKENS_TokenHash");
+            entity.HasIndex(e => e.UserId, "IX_REFRESH_TOKENS_UserId");
+
+            entity.Property(e => e.TokenHash).HasMaxLength(500);
+            entity.Property(e => e.JwtId).HasMaxLength(100);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.ExpiresAt).HasColumnType("datetime");
+            entity.Property(e => e.IsUsed).HasDefaultValue(false);
+            entity.Property(e => e.IsRevoked).HasDefaultValue(false);
+
+            entity.HasOne(d => d.User)
+                .WithMany(p => p.RefreshTokens)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_REFRESH_TOKENS_USERS");
         });
 
         OnModelCreatingPartial(modelBuilder);

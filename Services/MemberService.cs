@@ -16,15 +16,18 @@ namespace LibraryManagement.Services
 
         public async Task<IEnumerable<MemberDto>> GetAllMembersAsync()
         {
-            var members = await _context.Members.ToListAsync();
-            return members.Select(m => new MemberDto
-            {
-                Id = m.Id,
-                FullName = m.FullName,
-                PhoneNumber = m.PhoneNumber,
-                Address = m.Address,
-                CreatedAt = m.CreatedAt
-            });
+            var members = await _context.Members
+                .Select(m => new MemberDto
+                {
+                    Id = m.Id,
+                    FullName = m.FullName,
+                    PhoneNumber = m.PhoneNumber,
+                    Address = m.Address,
+                    CreatedAt = m.CreatedAt
+                })
+                .ToListAsync();
+
+            return members;
         }
 
         public async Task<MemberDto?> GetMemberByIdAsync(int id)

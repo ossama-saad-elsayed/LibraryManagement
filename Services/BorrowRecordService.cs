@@ -103,7 +103,7 @@ namespace LibraryManagement.Services
             record.ReturnDate = returnDate;
             record.Status = "Returned";
 
-            if (record.Book != null)
+            if (record.Book != null && record.Book.AvailableCopies < record.Book.CopiesOwned)
             {
                 record.Book.AvailableCopies++;
             }
