@@ -62,6 +62,9 @@ namespace LibraryManagement.Services
 
             if (fine == null) return null;
 
+            if (fine.IsPaid) return MapToDto(fine); 
+
+
             fine.IsPaid = true;
             fine.PaidDate = DateTime.UtcNow;
 
@@ -95,7 +98,14 @@ namespace LibraryManagement.Services
             fine.BorrowRecord = borrowRecord;
             return MapToDto(fine);
         }
-
+        public async Task<bool> DeleteFineAsync(int id)
+        {
+            var fine = await _context.Fines.FindAsync(id);
+            if (fine == null) return false;
+            _context.Fines.Remove(fine);
+            await _context.SaveChangesAsync();
+            return true;
+        }
         private static FineDto MapToDto(Fine f)
         {
             return new FineDto

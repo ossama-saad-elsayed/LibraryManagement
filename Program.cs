@@ -1,4 +1,5 @@
 
+using LibraryManagement.DTOS;
 using LibraryManagement.Services;
 using LibraryManagement.Services.interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -29,7 +30,8 @@ namespace LibraryManagement
 
             builder.Services.AddDbContext<LibraryManagement.Entities.LibraryManagementDbContext>(options=>options.UseSqlServer(connectionString));
             // Add services to the container.
-
+            builder.Services.Configure<FineOptions>(builder.Configuration.GetSection("FineOptions"));
+            builder.Services.AddHostedService<OverdueFineScanner>();
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();

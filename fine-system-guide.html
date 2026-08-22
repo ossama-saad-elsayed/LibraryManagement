@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fine System Upgrade Guide — LibraryManagement</title>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --card: #ffffff;
+    --text: #24292f;
+    --muted: #57606a;
+    --accent: #0969da;
+    --border: #d0d7de;
+    --code-bg: #1e1e2e;
+    --code-text: #cdd6f4;
+    --code-border: #313244;
+    --green-bg: #dafbe1;
+    --green-border: #18733b;
+    --amber-bg: #fff8c5;
+    --amber-border: #bf8700;
+    --file-pill: #ddf4ff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.55;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 32px 20px 80px; }
+  header.hero {
+    background: linear-gradient(135deg, #0d1117, #1f2937);
+    color: #fff;
+    border-radius: 12px;
+    padding: 28px 28px 22px;
+    margin-bottom: 28px;
+  }
+  header.hero h1 { margin: 0 0 6px; font-size: 1.7em; }
+  header.hero p { margin: 0; color: #9ca3af; font-size: 0.95em; }
+  h2.step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.25em;
+    margin: 40px 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+  }
+  h2.step:first-of-type { margin-top: 8px; }
+  .stepnum {
+    background: var(--accent);
+    color: #fff;
+    min-width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75em;
+    flex-shrink: 0;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin: 14px 0;
+  }
+  .filepill {
+    display: inline-block;
+    background: var(--file-pill);
+    border: 1px solid #54aeff66;
+    color: #0550ae;
+    border-radius: 6px;
+    padding: 1px 8px;
+    font-family: ui-monospace, SFMono-Regular, Consolas, "Courier New", monospace;
+    font-size: 0.85em;
+    margin: 6px 0 10px;
+  }
+  pre {
+    background: var(--code-bg);
+    color: var(--code-text);
+    border: 1px solid var(--code-border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-family: ui-monospace, SFMono-Regular, Consolas, "Courier New", monospace;
+    font-size: 0.86em;
+    line-height: 1.5;
+  }
+  code.inline {
+    background: #eff1f3;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 1px 5px;
+    font-family: ui-monospace, SFMono-Regular, Consolas, "Courier New", monospace;
+    font-size: 0.88em;
+  }
+  table.overview {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    font-size: 0.93em;
+  }
+  table.overview th, table.overview td {
+    border-bottom: 1px solid var(--border);
+    padding: 10px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  table.overview th { background: #f0f3f6; }
+  table.overview tr:last-child td { border-bottom: none; }
+  .callout {
+    border-left: 4px solid;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 14px 0;
+  }
+  .callout.warn { background: var(--amber-bg); border-color: var(--amber-border); }
+  .callout.ok { background: var(--green-bg); border-color: var(--green-border); }
+  .toc { font-size: 0.95em; }
+  .toc ol { margin: 6px 0 0 18px; padding: 0; }
+  ul.checklist { list-style: none; padding-left: 0; margin: 8px 0; }
+  ul.checklist li { padding-left: 26px; position: relative; margin: 6px 0; }
+  ul.checklist li::before {
+    content: "\2713";
+    position: absolute;
+    left: 0;
+    color: var(--green-border);
+    font-weight: bold;
+  }
+  footer { margin-top: 48px; color: var(--muted); font-size: 0.85em; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>Fine System Upgrade &mdash; Implementation Guide</h1>
+  <p>LibraryManagement (ASP.NET Core 8 Web API &middot; EF Core &middot; SQL Server) &middot; Code-only changes, no DB schema migration &middot; August 21, 2026</p>
+</header>
+
+<div class="card toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#step1">Settings foundation (FineOptions + appsettings)</a></li>
+    <li><a href="#step2">BorrowRecordService &mdash; configurable rate, grace period, cap, unpaid-fine block</a></li>
+    <li><a href="#step3">OverdueFineScanner background job</a></li>
+    <li><a href="#step4">Waive/delete fines + idempotent payment</a></li>
+    <li><a href="#step5">Controller security (Admin-only mutations)</a></li>
+    <li><a href="#verify">Verification checklist</a></li>
+    <li><a href="#gotchas">Gotchas</a></li>
+  </ol>
+</div>
+
+<table class="overview">
+  <tr><th style="width:36px">#</th><th>Change</th><th>Files</th></tr>
+  <tr><td>1</td><td>Fine settings options class (rate, grace, cap, interval, toggle) wired to config</td><td>New <code class="inline">DTOS/FineOptions.cs</code>, edit <code class="inline">appsettings.json</code>, <code class="inline">Program.cs</code></td></tr>
+  <tr><td>2</td><td>Configurable fine math + block borrowing when member has unpaid fines (gated by toggle)</td><td>Edit <code class="inline">Services/BorrowRecordService.cs</code></td></tr>
+  <tr><td>3</td><td>Daily background scan that fines unreturned overdue records, no duplicates</td><td>New <code class="inline">Services/OverdueFineScanner.cs</code>, edit <code class="inline">Program.cs</code></td></tr>
+  <tr><td>4</td><td>Waive = hard delete endpoint; paying twice no longer overwrites PaidDate</td><td>Edit <code class="inline">Services/interfaces/IFineService.cs</code>, <code class="inline">Services/FineService.cs</code>, <code class="inline">Controllers/FinesController.cs</code></td></tr>
+  <tr><td>5</td><td>POST / pay / DELETE restricted to Admin role</td><td>Edit <code class="inline">Controllers/FinesController.cs</code></td></tr>
+</table>
+
+<h2 class="step" id="step1"><span class="stepnum">1</span> Settings foundation</h2>
+
+<div class="card">
+  <div class="filepill">DTOS/FineOptions.cs &mdash; NEW FILE</div>
+<pre>namespace LibraryManagement.DTOS;
+
+public class FineOptions
+{
+    public decimal DailyFineRate { get; set; } = 1.00m;
+    public int GracePeriodDays { get; set; } = 0;
+    public decimal MaxFineCap { get; set; } = 100.00m;
+    public int ScannerIntervalHours { get; set; } = 24;
+    public bool BlockBorrowingOnUnpaidFines { get; set; } = true;
+}</pre>
+
+  <div class="filepill">appsettings.json &mdash; add next to "Jwt"</div>
+<pre>"FineOptions": {
+  "DailyFineRate": 1.00,
+  "GracePeriodDays": 0,
+  "MaxFineCap": 100.00,
+  "ScannerIntervalHours": 24,
+  "BlockBorrowingOnUnpaidFines": true
+}</pre>
+
+  <div class="filepill">Program.cs &mdash; add usings and registrations (before builder.Build())</div>
+<pre>using LibraryManagement.DTOS;
+using LibraryManagement.Services;
+
+builder.Services.Configure&lt;FineOptions&gt;(builder.Configuration.GetSection("FineOptions"));
+builder.Services.AddHostedService&lt;OverdueFineScanner&gt;();</pre>
+</div>
+
+<h2 class="step" id="step2"><span class="stepnum">2</span> BorrowRecordService changes</h2>
+
+<div class="card">
+  <div class="filepill">Services/BorrowRecordService.cs</div>
+
+  <p><strong>a)</strong> Replace the hard-coded const (line 11) with injected options. Add <code class="inline">using Microsoft.Extensions.Options;</code> at the top:</p>
+<pre>private readonly LibraryManagementDbContext _context;
+private readonly FineOptions _fine;
+
+public BorrowRecordService(LibraryManagementDbContext context, IOptions&lt;FineOptions&gt; fineOptions)
+{
+    _context = context;
+    _fine = fineOptions.Value;
+}</pre>
+
+  <p><strong>b)</strong> Add a shared calculator used by BOTH the return flow and the scanner:</p>
+<pre>public static decimal? CalculateOverdueAmount(DateTime dueDate, DateTime asOfDate, FineOptions s)
+{
+    var days = (int)Math.Ceiling((asOfDate - dueDate).TotalDays) - s.GracePeriodDays;
+    return days &gt; 0 ? Math.Min(days * s.DailyFineRate, s.MaxFineCap) : null;
+}</pre>
+
+  <p><strong>c)</strong> Rewrite the fine calculation inside <code class="inline">ReturnBookAsync</code> (currently lines 111&ndash;127):</p>
+<pre>var fineAmount = CalculateOverdueAmount(record.DueDate, returnDate, _fine);
+if (fineAmount.HasValue)
+{
+    _context.Fines.Add(new Fine
+    {
+        BorrowRecordId = record.Id,
+        Amount = fineAmount.Value,
+        IsPaid = false,
+        PaidDate = null
+    });
+}</pre>
+
+  <p><strong>d)</strong> Unpaid-fine borrowing gate &mdash; insert into <code class="inline">BorrowBookAsync</code> right after the member null-check (~line 55). EF translates the navigation <code class="inline">f.BorrowRecord.MemberId</code> without an Include:</p>
+<pre>if (_fine.BlockBorrowingOnUnpaidFines)
+{
+    var hasUnpaidFines = await _context.Fines
+        .AnyAsync(f =&gt; !f.IsPaid &amp;&amp; f.BorrowRecord.MemberId == request.MemberId);
+    if (hasUnpaidFines)
+        throw new InvalidOperationException(
+            $"Member with ID {request.MemberId} has unpaid fines and cannot borrow.");
+}</pre>
+  <div class="callout ok"><strong>No controller change needed:</strong> <code class="inline">BorrowRecordsController.cs:61-64</code> already maps <code class="inline">InvalidOperationException</code> to HTTP 400.</div>
+</div>
+
+<h2 class="step" id="step3"><span class="stepnum">3</span> Overdue scanner background job</h2>
+
+<div class="card">
+  <div class="filepill">Services/OverdueFineScanner.cs &mdash; NEW FILE</div>
+<pre>using LibraryManagement.DTOS;
+using LibraryManagement.Entities;
+
+namespace LibraryManagement.Services;
+
+public class OverdueFineScanner : BackgroundService
+{
+    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly FineOptions _settings;
+    private readonly ILogger&lt;OverdueFineScanner&gt; _logger;
+
+    public OverdueFineScanner(IServiceScopeFactory scopeFactory,
+        IOptions&lt;FineOptions&gt; options, ILogger&lt;OverdueFineScanner&gt; logger)
+    {
+        _scopeFactory = scopeFactory;
+        _settings = options.Value;
+        _logger = logger;
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        // run once immediately at startup, then every interval
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            try
+            {
+                await ScanAsync(stoppingToken);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                _logger.LogError(ex, "Overdue fine scan failed");
+            }
+
+            try
+            {
+                await Task.Delay(TimeSpan.FromHours(_settings.ScannerIntervalHours), stoppingToken);
+            }
+            catch (OperationCanceledException) { break; }
+        }
+    }
+
+    private async Task ScanAsync(CancellationToken ct)
+    {
+        using var scope = _scopeFactory.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService&lt;LibraryManagementDbContext&gt;();
+
+        var now = DateTime.UtcNow;
+        var overdueRecords = await db.BorrowRecords
+            .Where(b =&gt; b.Status == "Borrowed" &amp;&amp; b.DueDate &lt; now)
+            .Where(b =&gt; !db.Fines.Any(f =&gt; f.BorrowRecordId == b.Id &amp;&amp; !f.IsPaid)) // no duplicates
+            .ToListAsync(ct);
+
+        foreach (var record in overdueRecords)
+        {
+            var amount = BorrowRecordService.CalculateOverdueAmount(record.DueDate, now, _settings);
+            if (amount.HasValue)
+                db.Fines.Add(new Fine
+                {
+                    BorrowRecordId = record.Id,
+                    Amount = amount.Value,
+                    IsPaid = false
+                });
+        }
+
+        if (overdueRecords.Count &gt; 0)
+        {
+            await db.SaveChangesAsync(ct);
+            _logger.LogInformation("Created fines for {Count} overdue records", overdueRecords.Count);
+        }
+    }
+}</pre>
+  <p>The <code class="inline">AddHostedService&lt;OverdueFineScanner&gt;()</code> registration was already added in Step 1.</p>
+</div>
+
+<h2 class="step" id="step4"><span class="stepnum">4</span> Waive/delete fines + idempotent payment</h2>
+
+<div class="card">
+  <div class="filepill">Services/interfaces/IFineService.cs &mdash; add method to interface</div>
+<pre>Task&lt;bool&gt; DeleteFineAsync(int id);</pre>
+
+  <div class="filepill">Services/FineService.cs &mdash; implement (waive = hard delete, since no Status column)</div>
+<pre>public async Task&lt;bool&gt; DeleteFineAsync(int id)
+{
+    var fine = await _context.Fines.FindAsync(id);
+    if (fine == null) return false;
+    _context.Fines.Remove(fine);
+    await _context.SaveChangesAsync();
+    return true;
+}</pre>
+
+  <div class="filepill">Services/FineService.cs &mdash; PayFineAsync: add guard BEFORE "fine.IsPaid = true;" (line 65)</div>
+<pre>if (fine.IsPaid) return MapToDto(fine); // idempotent - don't overwrite PaidDate
+
+fine.IsPaid = true;
+fine.PaidDate = DateTime.UtcNow;</pre>
+</div>
+
+<h2 class="step" id="step5"><span class="stepnum">5</span> Controller security (Admin-only mutations)</h2>
+
+<div class="card">
+  <div class="filepill">Controllers/FinesController.cs</div>
+  <p>Add <code class="inline">[Authorize(Roles = "Admin")]</code> on top of the POST action (line ~45) and the PUT pay action (line ~61). GETs stay <code class="inline">[Authorize]</code> so any authenticated user can view. Then add the new endpoint:</p>
+<pre>[HttpDelete("{id}")]
+[Authorize(Roles = "Admin")]
+public async Task&lt;IActionResult&gt; DeleteFine(int id)
+{
+    var deleted = await _fineService.DeleteFineAsync(id);
+    return deleted ? NoContent() : NotFound($"Fine with ID {id} was not found.");
+}</pre>
+  <p>This matches the existing pattern in <code class="inline">UsersController.cs:8</code>; the JWT already carries the role claim (<code class="inline">AuthService.cs:96</code>).</p>
+</div>
+
+<h2 class="step" id="verify"><span class="stepnum">&#10003;</span> Verification checklist</h2>
+<div class="card">
+<ul class="checklist">
+  <li><code class="inline">dotnet build</code> passes</li>
+  <li>Swagger: returning an overdue book creates a fine</li>
+  <li>Second scanner pass does NOT duplicate fines for the same record</li>
+  <li>Member with an unpaid fine gets HTTP 400 when trying to borrow (toggle on)</li>
+  <li>Non-admin token gets HTTP 403 on POST /pay/DELETE; admin succeeds</li>
+  <li>Paying an already-paid fine returns the same PaidDate (no overwrite)</li>
+  <li>DELETE removes the fine row (waive)</li>
+</ul>
+</div>
+
+<h2 class="step" id="gotchas"><span class="stepnum">!</span> Gotchas</h2>
+<div class="callout warn">
+  <strong>DueDate vs UtcNow mismatch:</strong> DueDate comes from client input while all comparisons use <code class="inline">DateTime.UtcNow</code>. Consider validating that DueDate is sane (not in the past at creation) or normalizing time zones consistently.
+</div>
+<div class="callout warn">
+  <strong>Re-accrual after payment:</strong> if a member pays their fine but still hasn't returned the book, the scanner will create a fresh fine for continued overdue days on its next pass. That is intended accrual behavior &mdash; don't treat it as a bug.
+</div>
+<div class="callout warn">
+  <strong>Duplicate-prevention rule:</strong> the scanner skips records that already have ANY unpaid fine. A record can therefore only have one open fine at a time.
+</div>
+
+<footer>Generated by opencode &middot; LibraryManagement Fine System Upgrade &middot; 2026-08-21</footer>
+</div>
+</body>
+</html>

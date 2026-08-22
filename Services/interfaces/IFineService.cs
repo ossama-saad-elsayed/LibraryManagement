@@ -9,5 +9,7 @@ namespace LibraryManagement.Services.interfaces
         Task<IEnumerable<FineDto>> GetFinesByMemberIdAsync(int memberId);
         Task<FineDto?> PayFineAsync(int fineId);
         Task<FineDto> CreateFineAsync(CreateFineDto request);
+        Task<bool> DeleteFineAsync(int id);
+
     }
 }

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryManagement.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     [ApiController]
     public class FinesController : ControllerBase
@@ -67,6 +67,13 @@ namespace LibraryManagement.Controllers
                 return NotFound($"Fine with ID {id} was not found.");
             }
             return Ok(updatedFine);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteFine(int id)
+        {
+            var deleted = await _fineService.DeleteFineAsync(id);
+            return deleted ? NoContent() : NotFound($"Fine with ID {id} was not found.");
         }
     }
 }

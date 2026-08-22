@@ -2,19 +2,20 @@ using LibraryManagement.DTOS;
 using LibraryManagement.Entities;
 using LibraryManagement.Services.interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace LibraryManagement.Services
 {
     public class BorrowRecordService : IBorrowRecordService
     {
         private readonly LibraryManagementDbContext _context;
-        private const decimal DailyFineRate = 1.00m; // Default $1.00 fine per day overdue
+        private readonly FineOptions _fine;
 
-        public BorrowRecordService(LibraryManagementDbContext context)
+        public BorrowRecordService(LibraryManagementDbContext context, IOptions<FineOptions> fineOptions)
         {
             _context = context;
+            _fine = fineOptions.Value;
         }
-
         public async Task<IEnumerable<BorrowRecordDto>> GetAllBorrowRecordsAsync()
         {
             var records = await _context.BorrowRecords
@@ -54,6 +55,14 @@ namespace LibraryManagement.Services
                 throw new KeyNotFoundException($"Member with ID {request.MemberId} was not found.");
             }
 
+            if (_fine.BlockBorrowingOnUnpaidFines)
+            {
+                var hasUnpaidFines = await _context.Fines
+                    .AnyAsync(f => !f.IsPaid && f.BorrowRecord.MemberId == request.MemberId);
+                if (hasUnpaidFines)
+                    throw new InvalidOperationException(
+                        $"Member with ID {request.MemberId} has unpaid fines and cannot borrow.");
+            }
             var book = await _context.Books.FindAsync(request.BookId);
             if (book == null)
             {
@@ -107,28 +116,24 @@ namespace LibraryManagement.Services
             {
                 record.Book.AvailableCopies++;
             }
-
-            // Calculate fine if overdue
-            if (returnDate > record.DueDate)
+            var fineAmount = CalculateOverdueAmount(record.DueDate, returnDate, _fine);
+            if (fineAmount.HasValue)
             {
-                var overdueDays = (int)Math.Ceiling((returnDate - record.DueDate).TotalDays);
-                if (overdueDays > 0)
+                _context.Fines.Add(new Fine
                 {
-                    var fineAmount = overdueDays * DailyFineRate;
-                    var fine = new Fine
-                    {
-                        BorrowRecordId = record.Id,
-                        Amount = fineAmount,
-                        IsPaid = false,
-                        PaidDate = null
-                    };
-                    _context.Fines.Add(fine);
-                }
+                    BorrowRecordId = record.Id,
+                    Amount = fineAmount.Value,
+                    IsPaid = false,
+                    PaidDate = null
+                });
             }
-
             await _context.SaveChangesAsync();
             return MapToDto(record);
         }
+            
+
+            
+        
 
         private static BorrowRecordDto MapToDto(BorrowRecord b)
         {
@@ -144,6 +149,12 @@ namespace LibraryManagement.Services
                 BookTitle = b.Book?.Title ?? string.Empty,
                 MemberFullName = b.Member?.FullName ?? string.Empty
             };
+        }
+
+        public static decimal? CalculateOverdueAmount(DateTime dueDate, DateTime asOfDate, FineOptions s)
+        {
+            var days = (int)Math.Ceiling((asOfDate - dueDate).TotalDays) - s.GracePeriodDays;
+            return days > 0 ? Math.Min(days * s.DailyFineRate, s.MaxFineCap) : null;
         }
     }
 }
